@@ -7,6 +7,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Schema;
 use TomatoPHP\FilamentLanguageSwitcher\Models\UserLanguage;
+use TomatoPHP\FilamentTenancy\Models\Tenant;
 
 class LanguageController
 {
@@ -18,6 +19,8 @@ class LanguageController
             'model_id' => 'required',
         ]);
 
+        // FIXME: route-level middleware is executed after controller constructors
+        Tenant::setDB();
         if (Schema::hasColumn(app($request->get('model'))->getTable(), 'lang')) {
             $model = app($request->get('model'))->find($request->get('model_id'));
             $model->lang = $request->get('lang');
@@ -46,6 +49,7 @@ class LanguageController
             ->iconColor('success')
             ->send();
 
+        Tenant::setDB(false);
         if (config('filament-language-switcher.redirect') === 'next') {
             return back();
         }
